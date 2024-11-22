@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import Gallery from "@/components/Gallery";
 
 export default function HomePage() {
   return (
@@ -22,6 +23,7 @@ export default function HomePage() {
           />
         </div>
       </div>
+      <Gallery />
     </div>
   );
 }
