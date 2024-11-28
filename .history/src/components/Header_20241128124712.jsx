@@ -11,13 +11,13 @@ import Link from "next/link";
 import { db } from "@/utils/dbConnection";
 import { auth } from "@clerk/nextjs/server";
 export default async function Header() {
-  //const { userId } = auth();
+  const { userId } = auth();
 
   const query = await db.query(
     `SELECT clerk_id FROM parent WHERE clerk_id = $1`,
     [auth]
   );
-  const user = query.rows;
+  const user = query.rows[0]?.clerk_id;
 
   return (
     <div>

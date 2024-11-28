@@ -1,24 +1,31 @@
+import { currentUser } from "@clerk/nextjs/server";
+import { db } from "@/utils/dbConnection";
 import {
-  UserButton,
   SignedOut,
-  SignedIn,
+  SignIn,
   SignInButton,
   SignUpButton,
+  UserButton,
 } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 
-import { db } from "@/utils/dbConnection";
-import { auth } from "@clerk/nextjs/server";
 export default async function Header() {
-  //const { userId } = auth();
-
+  const user = await currentUser();
+  const username = user.username;
+  const userID = user.id;
+  const email = user.primaryEmailAddress;
   const query = await db.query(
     `SELECT clerk_id FROM parent WHERE clerk_id = $1`,
-    [auth]
+    [userID]
   );
-  const user = query.rows;
-
+  const queryResult = query.rows[0]?.clerk_id;
+  if (!queryResult) {
+    await db.query(
+      `INSERT INTO parent(clerk_id, username, email) VALUES($1, $2, $3)`,
+      [userID, username, email]
+    );
+  }
   return (
     <div>
       <div className=" flex justify-between p-5 ml-28">
@@ -28,9 +35,9 @@ export default async function Header() {
         </div>
 
         <div className="container flex items-center justify-end pr-24">
-          <SignedIn>
+          <SignInButton>
             <UserButton />
-          </SignedIn>
+          </SignInButton>
           <SignedOut>
             <SignInButton mode="modal">Sign In</SignInButton>
             <SignUpButton mode="modal">Sign Up</SignUpButton>
@@ -59,7 +66,7 @@ export default async function Header() {
           <Link href="/school">
             <p>Schools</p>
           </Link>
-          <Link href={`/userProfile/${user.username}`}>
+          <Link href={`/userProfile/${username}`}>
             <p>User Profile</p>
           </Link>
         </div>

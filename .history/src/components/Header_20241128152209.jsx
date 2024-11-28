@@ -17,7 +17,7 @@ export default async function Header() {
     `SELECT clerk_id FROM parent WHERE clerk_id = $1`,
     [auth]
   );
-  const user = query.rows;
+  const user = query.rows.json;
 
   return (
     <div>

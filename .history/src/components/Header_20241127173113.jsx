@@ -1,24 +1,17 @@
+"use client";
 import {
-  UserButton,
   SignedOut,
-  SignedIn,
+  SignIn,
   SignInButton,
   SignUpButton,
+  UserButton,
 } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
+import { useUser } from "@clerk/nextjs"; // Assuming you're using Clerk for authentication
 
-import { db } from "@/utils/dbConnection";
-import { auth } from "@clerk/nextjs/server";
-export default async function Header() {
-  //const { userId } = auth();
-
-  const query = await db.query(
-    `SELECT clerk_id FROM parent WHERE clerk_id = $1`,
-    [auth]
-  );
-  const user = query.rows;
-
+export default function Header() {
+  const { user } = useUser(); // Get the current user
   return (
     <div>
       <div className=" flex justify-between p-5 ml-28">
@@ -28,9 +21,9 @@ export default async function Header() {
         </div>
 
         <div className="container flex items-center justify-end pr-24">
-          <SignedIn>
+          <SignInButton>
             <UserButton />
-          </SignedIn>
+          </SignInButton>
           <SignedOut>
             <SignInButton mode="modal">Sign In</SignInButton>
             <SignUpButton mode="modal">Sign Up</SignUpButton>

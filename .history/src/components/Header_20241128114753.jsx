@@ -4,21 +4,36 @@ import {
   SignedIn,
   SignInButton,
   SignUpButton,
+  UserProfile,
 } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
-
-import { db } from "@/utils/dbConnection";
 import { auth } from "@clerk/nextjs/server";
-export default async function Header() {
-  //const { userId } = auth();
+// import { currentUser } from "@clerk/nextjs/server";
+import { db } from "@/utils/dbConnection";
 
+export default async function Header() {
+  const { userId } = auth;
+  // const user = await currentUser();
+  // const username = user.username;
+  // const userID = user.id;
+  // const email = user.emailAddresses[0].emailAddress;
   const query = await db.query(
     `SELECT clerk_id FROM parent WHERE clerk_id = $1`,
     [auth]
   );
-  const user = query.rows;
-
+  const queryResult = query.rows[0]?.clerk_id;
+  if (!queryResult) {
+    await db.query(
+      `SELECT FROM parent(clerk_id, username, email) VALUES($1, $2)`,
+      [username, email]
+    );
+  }
+  if (auth === true) {
+    return <Link href={`/userProfile/${username}`} />;
+  } else if (auth === false) {
+    return <p>Sorry you have to log in </p>;
+  }
   return (
     <div>
       <div className=" flex justify-between p-5 ml-28">
@@ -59,7 +74,7 @@ export default async function Header() {
           <Link href="/school">
             <p>Schools</p>
           </Link>
-          <Link href={`/userProfile/${user.username}`}>
+          <Link href={`/userProfile/${username}`}>
             <p>User Profile</p>
           </Link>
         </div>

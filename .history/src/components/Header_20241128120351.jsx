@@ -8,17 +8,24 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 
+import { currentUser } from "@clerk/nextjs/server";
 import { db } from "@/utils/dbConnection";
 import { auth } from "@clerk/nextjs/server";
 export default async function Header() {
-  //const { userId } = auth();
+  const { userId } = auth();
+  const { currentUser } = user;
 
   const query = await db.query(
-    `SELECT clerk_id FROM parent WHERE clerk_id = $1`,
-    [auth]
+    `SELECT parent(clerk_id, username, email) VALUES($1, $2, $3)`,
+    [auth, username, email]
   );
-  const user = query.rows;
-
+  const queryResult = query.rows[0]?.clerk_id;
+  if (!queryResult == user) {
+    await db.query(
+      `SELECT parent(clerk_id, username, email) VALUES($1, $2, $3)`,
+      [auth, username]
+    );
+  }
   return (
     <div>
       <div className=" flex justify-between p-5 ml-28">
@@ -59,7 +66,7 @@ export default async function Header() {
           <Link href="/school">
             <p>Schools</p>
           </Link>
-          <Link href={`/userProfile/${user.username}`}>
+          <Link href={`/userProfile/${auth.username}`}>
             <p>User Profile</p>
           </Link>
         </div>

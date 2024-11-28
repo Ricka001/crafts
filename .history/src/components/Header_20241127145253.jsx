@@ -1,23 +1,16 @@
 import {
-  UserButton,
   SignedOut,
-  SignedIn,
+  SignIn,
   SignInButton,
   SignUpButton,
+  UserButton,
 } from "@clerk/nextjs";
+("use client");
 import Image from "next/image";
 import Link from "next/link";
-
-import { db } from "@/utils/dbConnection";
-import { auth } from "@clerk/nextjs/server";
-export default async function Header() {
-  //const { userId } = auth();
-
-  const query = await db.query(
-    `SELECT clerk_id FROM parent WHERE clerk_id = $1`,
-    [auth]
-  );
-  const user = query.rows;
+import { useUser } from "@clerk/nextjs"; // Assuming you're using Clerk for authentication
+export default function Header() {
+  const { user } = useUser(); // Get the current user
 
   return (
     <div>
@@ -28,9 +21,9 @@ export default async function Header() {
         </div>
 
         <div className="container flex items-center justify-end pr-24">
-          <SignedIn>
+          <SignInButton>
             <UserButton />
-          </SignedIn>
+          </SignInButton>
           <SignedOut>
             <SignInButton mode="modal">Sign In</SignInButton>
             <SignUpButton mode="modal">Sign Up</SignUpButton>
@@ -59,7 +52,7 @@ export default async function Header() {
           <Link href="/school">
             <p>Schools</p>
           </Link>
-          <Link href={`/userProfile/${user.username}`}>
+          <Link href={`/userProfile/${username}`}>
             <p>User Profile</p>
           </Link>
         </div>

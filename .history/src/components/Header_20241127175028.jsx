@@ -1,23 +1,21 @@
 import {
-  UserButton,
   SignedOut,
-  SignedIn,
+  SignIn,
   SignInButton,
   SignUpButton,
+  UserButton,
 } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
+import { auth, currentUser } from "@clerk/nextjs";
 
-import { db } from "@/utils/dbConnection";
-import { auth } from "@clerk/nextjs/server";
 export default async function Header() {
-  //const { userId } = auth();
+  const { userId } = auth;
 
-  const query = await db.query(
-    `SELECT clerk_id FROM parent WHERE clerk_id = $1`,
-    [auth]
-  );
-  const user = query.rows;
+  if (!userId || !user) {
+    return <div>You are not logged in </div>;
+  }
+  const user = await currentUser();
 
   return (
     <div>
@@ -28,9 +26,9 @@ export default async function Header() {
         </div>
 
         <div className="container flex items-center justify-end pr-24">
-          <SignedIn>
+          <SignInButton>
             <UserButton />
-          </SignedIn>
+          </SignInButton>
           <SignedOut>
             <SignInButton mode="modal">Sign In</SignInButton>
             <SignUpButton mode="modal">Sign Up</SignUpButton>

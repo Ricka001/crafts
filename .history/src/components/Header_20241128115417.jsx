@@ -8,16 +8,18 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 
+import { currentUser } from "@clerk/nextjs/server";
 import { db } from "@/utils/dbConnection";
-import { auth } from "@clerk/nextjs/server";
-export default async function Header() {
-  //const { userId } = auth();
 
+export default async function Header() {
+  const user = await currentUser();
+  const username = user.username;
+  const userID = user.id;
+  const email = user.emailAddresses[0].emailAddress;
   const query = await db.query(
-    `SELECT clerk_id FROM parent WHERE clerk_id = $1`,
-    [auth]
+    `SELECT parent(clerk_id, username, email) VALUES($1, $2, $3)`,
+    [userID, username, email]
   );
-  const user = query.rows;
 
   return (
     <div>
@@ -59,7 +61,7 @@ export default async function Header() {
           <Link href="/school">
             <p>Schools</p>
           </Link>
-          <Link href={`/userProfile/${user.username}`}>
+          <Link href={`/userProfile/${query.username}`}>
             <p>User Profile</p>
           </Link>
         </div>
